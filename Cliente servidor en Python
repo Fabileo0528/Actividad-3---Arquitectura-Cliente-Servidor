@@ -1,0 +1,62 @@
+#Importamos las bibliotecas necesarias para el código 
+import socket
+import sys
+
+def cliente():
+try:
+#Creamos el socket del cliente y nos conectamos con el servidor
+cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+cliente.connect(('localhost', 8000))
+    #Solicitamos al usuario ingresar un mensaje para enviarlo al servidor
+    mensaje = input("Ingresa el mensaje a enviar al servidor: ")
+
+    #Enviamos el mensaje al servidor y esperamos la respuesta
+    cliente.sendall(mensaje.encode('utf-8'))
+    respuesta = cliente.recv(1024)
+
+    #Imprimimos la respuesta del servidor
+    print(respuesta.decode('utf-8'))
+
+except socket.error as error:
+    #En caso de error, mostramos el mensaje correspondiente
+    print("Error: ", error)
+finally:
+    #Cerramos la conexión con el servidor
+    cliente.close()
+def servidor():
+try:
+#Creamos el socket del servidor, nos enlazamos al puerto y esperamos la conexión del cliente
+servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+servidor.bind(('localhost', 8000))
+servidor.listen(1)
+    #Espere hasta que un cliente se conecte y acepte la conexión
+    conn, addr = servidor.accept()
+
+    #Recibimos el mensaje del cliente y lo procesamos
+    mensaje_cliente = conn.recv(1024)
+    mensaje_respuesta = "Mensaje recibido: " + mensaje_cliente.decode('utf-8')
+
+    #Enviamos la respuesta al cliente y cerramos la conexión
+    conn.sendall(mensaje_respuesta.encode('utf-8'))
+
+except socket.error as error:
+    #En caso de error, mostramos el mensaje correspondiente
+    print("Error: ", error)
+finally:
+    #Cerramos la conexión con el cliente y finalizamos el servidor
+    conn.close()
+    servidor.close()
+#Menú para seleccionar el rol del usuario
+while True:
+try:
+opcion = int(input("Selecciona tu rol: 1. Cliente 2. Servidor \n"))
+    if opcion == 1:
+        cliente()
+        break
+    elif opcion == 2:
+        servidor()
+        break
+    else:
+        print("Opción no válida. Inténtalo de nuevo.")
+except ValueError:
+    print("Opción no válida. Inténtalo de nuevo.")
